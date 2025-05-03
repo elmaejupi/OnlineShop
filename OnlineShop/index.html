@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Online Shop</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <header class="h-24 mx-auto flex items-center bg-orange-100">
+        <div class="container mx-6 flex items-center justify-between">
+            <span class="text-3xl text-slate-900"><i class="fa-solid fa-shop"></i> Online Shop</span>
+            <nav>
+                <ul class="flex items-center gap-4">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="cart.html">Cart (<span id="cart_counter">0</span>)</a></li>
+                    <div class="auth flex flex-wrap items-center gap-4" style="display: none;">
+                        <a href="dashboard.html">Dashboard</a>
+                        <a href="dashboard.html?action=logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+                    </div>
+                    <div class="guest flex flex-wrap items-center gap-4">
+                        <a href="register.html">Register</a>
+                        <a href="login.html">Login</a>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="slider" class="h-[650px] overflow-y-hidden bg-slate-50">
+        <img
+            src='https://media.boohoo.com/i/boohooamplience/BH_160924_SPLASH_UK_21_DESKTOP?qlt=default&fmt=auto'
+            alt='' />
+    </section>
+
+    <section class="py-20">
+        <div class="container mx-auto">
+            <h2 class="text-3xl text-center font-semibold text-red-200">Latest Products</h2>
+            <div class="grid grid-cols-4 gap-6 my-12" id="latest_fashion"></div>
+            <a href="shop.html"
+                class="w-[200px] block mx-auto text-center py-2 border border-red-200 text-red-400 font-semibold">Explore
+                more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+    </section>
+
+    <footer class="bg-orange-100">
+        <div class="container mx-auto h-16 flex justify-between items-center">
+            <p>Copyrights &copy; Online Shop, 2024</p>
+            <p>Developer PP Team</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { authLinks, cartCounter, handleLogout } from "./modules/App.js";
+        const isloggedin = localStorage.getItem('isloggedin') === 'true';
+        authLinks(isloggedin);
+        handleLogout();
+        const cart = JSON.parse(localStorage.getItem('cart')) || {};
+        document.querySelector('#cart_counter').innerHTML = cartCounter(cart);
+        const slider = document.querySelector('#slider');
+        let active_slide = 1;
+        const slides = [
+            'https://media.boohoo.com/i/boohooamplience/BH_160924_SPLASH_UK_21_DESKTOP?qlt=default&fmt=auto',
+            'https://media.boohoo.com/i/boohooamplience/170924_DSK_COATS_UK?qlt=default&fmt=auto',
+            'https://media.boohoo.com/i/boohooamplience/230924_UK_PROMO_30OFF_DESK?qlt=80&fmt=auto'
+        ];
+        const latest_fashion = document.querySelector('#latest_fashion');
+        setInterval(function () {
+            slider.innerHTML = `<img src='${slides[active_slide]}' alt='' />`;
+            active_slide++;
+            if (active_slide > (slides.length - 1)) {
+                active_slide = 0;
+            }
+        }, 2000);
+        fetch('https://fakestoreapi.com/products')
+            .then(resp => resp.json())
+            .then(resp => {
+                const products = resp.slice(0, 12);
+                let products_html = '';
+                const truncateText = (text, limit) => {
+                    return text.length > limit ? text.substring(0, limit) + '...' : text;
+                };
+                for (let product of products) {
+                    products_html += `
+                        <div class="border border-gray-200 rounded-md p-4">
+                            <div class="w-52 h-52 overflow-y-hidden">
+                                <img src="${product.image}" alt="${product.title}" class="w-52 h-52 overflow-hidden flex justify-center items-center">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-center mb-1">${truncateText(product.title, 25)}</h3>
+                                <p class="text-red-500 font-bold mb-2">$${product.price}</p>
+                                <a href="products.html?id=${product.id}" class="w-[50px] text-center py-2 text-gray-200 border border-gray-200 hover:border-red-200 hover:text-red-400 font-semibold"><i class="fa-solid fa-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    `;
+                }
+                latest_fashion.innerHTML = products_html;
+            });
+    </script>
+    
+</body>
+
+</html>

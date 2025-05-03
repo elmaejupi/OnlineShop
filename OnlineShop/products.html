@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product - Online Shop</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header class="h-24 mx-auto flex items-center bg-orange-100">
+        <div class="container mx-6 flex items-center justify-between">
+            <span class="text-3xl text-slate-900"><i class="fa-solid fa-shop"></i> Online Shop</span>
+            <nav>
+                <ul class="flex items-center gap-4">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="cart.html">Cart (<span id="cart_counter">0</span>)</a></li>
+                    <div class="auth flex items-center gap-4">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="dashboard.html?action=logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                    </div>
+                    <div class="guest flex items-center gap-4">
+                        <li><a href="register.html">Register</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="py-20">
+        <div id="product" class="container mx-auto flex justify-between items-start"></div>
+    </section>
+
+    <footer class="bg-orange-100">
+        <div class="container mx-auto h-16 flex justify-between items-center">
+            <p>Copyrights &copy; Online Shop, 2024</p>
+            <p>Developer PP Team</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { authLinks, cartCounter } from "./modules/App.js";
+
+        const isloggedin = localStorage.getItem('isloggedin') === 'true';
+        const productDiv = document.querySelector('#product');
+
+        authLinks(isloggedin);
+
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get('id');
+
+        fetch(`https://fakestoreapi.com/products/${productId}`)
+            .then(resp => resp.json())
+            .then((product) => {
+                productDiv.innerHTML = `
+                    <div class="ml-36 w-1/2 overflow-hidden">
+                        <img src="${product.image}" alt="${product.title}" class="w-52 h-52 overflow-hidden flex justify-center items-center">
+                    </div>
+                    <div class="ml-20">
+                        <h1 class="text-3xl">${product.title}</h1>
+                        <p class="mt-12">${product.description}</p>
+                        <table class="mt-12">
+                            <tr>
+                                <td class="border border-gray-300 px-6 py-2">Category: </td>
+                                <td class="border border-gray-300 px-6 py-2">${product.category}</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 px-6 py-2">Price: </td>
+                                <td class="border border-gray-300 px-6 py-2">${product.price}$</td>
+                            </tr>
+                            <tr>
+                                <td class="border border-gray-300 px-6 py-2">Rating: </td>
+                                <td class="border border-gray-300 px-6 py-2">${product.rating.rate}</td>
+                            </tr>
+                        </table>
+                        ${
+                            isloggedin ? `
+                                <div class="mt-12">
+                                    <input type="number" id="quantity" value="1" max="100" min="1" class="border border-gray-300 px-2 py-1" />
+                                    <button id="add-to-cart" class="text-white bg-gray-600 px-2 ml-2 py-1">Add to cart</button>
+                                </div>
+                            ` : `
+                                <p class="mt-6"> Please <a href="login.html" class="underline"> login</a> first.</p>
+                            `
+                        }
+                    </div>
+                `;
+
+                if (isloggedin) {
+                    const addToCartButton = document.querySelector('#add-to-cart');
+                    addToCartButton.addEventListener('click', () => {
+                        const quantity = parseInt(document.querySelector('#quantity').value);
+                        addToCart({ id: product.id, title: product.title, price: product.price, image: product.image, quantity: quantity });
+                    });
+                }
+            });
+
+        function addToCart(product) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || {};
+            const productId = product.id;
+
+            if (cart[productId]) {
+                cart[productId].quantity += product.quantity;
+            } else {
+                cart[productId] = { ...product };
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            alert(`${product.title} has been added to your cart!`);
+            document.querySelector('#cart_counter').innerHTML = cartCounter(cart);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Online Shop</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header class="h-24 mx-auto flex items-center bg-orange-100">
+        <div class="container mx-6 flex items-center justify-between">
+            <span class="text-3xl text-slate-900"><i class="fa-solid fa-shop"></i> Online Shop</span>
+            <nav>
+                <ul class="flex items-center gap-4">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="cart.html">Cart (0)</a></li>
+                    <div class="auth flex items-center gap-4" style="display: none;">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="dashboard.html?action=logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                    </div>
+                    <div class="guest flex items-center gap-4" style="display: flex;">
+                        <li><a href="register.html">Register</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="py-20">
+        <div class="container mx-auto flex justify-center items-start">
+            <div class="w-2/3">
+                <h2 class="text-3xl mb-6">Register</h2>
+                <form id="registerForm" method="POST">
+                    <input type="text" name="fullname" placeholder="Enter fullname" class="w-[400px] border border-gray-300 px-6 py-2 mr-3 block mb-6" required />
+                    <input type="email" name="email" placeholder="Enter email address" class="w-[400px] border border-gray-300 px-6 py-2 mr-3 block mb-6" required />
+                    <input type="password" name="password1" placeholder="Enter password" class="w-[400px] border border-gray-300 px-6 py-2 mr-3 block mb-6" required />
+                    <input type="password" name="password2" placeholder="Confirm password" class="w-[400px] border border-gray-300 px-6 py-2 mr-3 block mb-6" required />
+                    <button type="submit" class="text-white bg-gray-600 px-4 py-2">Register</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-orange-100">
+        <div class="container mx-auto h-16 flex justify-between items-center">
+            <p>Copyrights &copy; Online Shop, 2024</p>
+            <p>Developer PP Team</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isloggedin') === 'true';
+            const authSection = document.querySelector('.auth');
+            const guestSection = document.querySelector('.guest');
+
+            if (isLoggedIn) {
+                authSection.style.display = 'flex';
+                guestSection.style.display = 'none';
+            } else {
+                authSection.style.display = 'none';
+                guestSection.style.display = 'flex';
+            }
+        });
+
+        const registerForm = document.querySelector('#registerForm');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const fullname = formData.get('fullname');
+            const email = formData.get('email');
+            const password1 = formData.get('password1');
+            const password2 = formData.get('password2');
+
+            if (password1 !== password2) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            const existingUser = JSON.parse(localStorage.getItem('user'));
+            if (existingUser && existingUser.email === email) {
+                alert('An account with this email already exists! Please use a different email.');
+                return;
+            }
+
+            try {
+                const response = await fetch('https://fakestoreapi.com/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        username: fullname,
+                        password: password1,
+                        name: {
+                            firstname: fullname.split(' ')[0] || '',
+                            lastname: fullname.split(' ')[1] || ''
+                        },
+                        address: {
+                            city: 'Your City',
+                            street: 'Your Street',
+                            number: 123,
+                            zipcode: '00000'
+                        },
+                        phone: '123-456-7890'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Registration failed!');
+                }
+
+                const result = await response.json();
+                localStorage.setItem('user', JSON.stringify({
+                    email: email,
+                    password: password1
+                }));
+
+                alert(`Welcome ${result.username || email}! Registration successful.`);
+                window.location.href = 'http://127.0.0.1:5500/login.html';
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

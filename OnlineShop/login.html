@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Shop</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header class="h-24 flex items-center bg-orange-100">
+        <div class="container mx-auto flex items-center justify-between">
+            <span class="text-3xl text-slate-900"><i class="fa-solid fa-shop"></i> Online Shop</span>
+            <nav>
+                <ul class="flex items-center gap-4">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="cart.html">Cart (0)</a></li>
+                    <div class="auth flex items-center gap-4">
+                        <li><a href="dashboard.html" class="hidden">Dashboard</a></li>
+                        <li><a href="dashboard.html?action=logout" class="hidden"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                    </div>
+                    <div class="guest flex items-center gap-4">
+                        <li><a href="register.html">Register</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="py-20">
+        <div class="container mx-auto flex justify-center items-start">
+            <div class="w-2/3">
+                <h2 class="text-3xl mb-6">Login</h2>
+                <form id="login" class="flex flex-col">
+                    <input type="email" name="email" placeholder="Enter email address" class="w-full border border-gray-300 px-6 py-2 mb-4" required />
+                    <input type="password" name="password" placeholder="Enter password" class="w-full border border-gray-300 px-6 py-2 mb-4" required />
+                    <button class="text-white bg-gray-600 px-4 py-2" type="submit">Login</button>
+                </form>
+                <p class="mt-4 text-center">Don't have an account? <a href="register.html" class="text-blue-500">Register here</a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-orange-100">
+        <div class="container mx-auto h-16 flex justify-between items-center">
+            <p>Copyrights &copy; Online Shop, 2024</p>
+            <p>Developer PP Team</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        const form = document.querySelector('#login');
+        const isloggedin = localStorage.getItem('isloggedin') ?? false;
+    
+        if (isloggedin) {
+            window.location.href = 'http://127.0.0.1:5500/shop.html';
+        }
+        
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = e.target.elements;
+    
+            const email = data['email'].value;
+            const password = data['password'].value;
+    
+            const user = JSON.parse(localStorage.getItem('user'));
+    
+            if (user && user.email === email && user.password === password) {
+                localStorage.setItem('isloggedin', true);
+                alert('Login successful! Welcome back!');
+                window.location.href = 'http://127.0.0.1:5500/shop.html';
+            } else {
+                alert('Invalid credentials! Please try again.');
+            }
+        });
+    </script>
+    
+</body>
+</html>

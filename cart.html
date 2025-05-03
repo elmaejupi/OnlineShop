@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - Online Shop</title>
+    <link rel="stylesheet" href="./css/output.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header class="h-24 mx-auto flex items-center bg-orange-100">
+        <div class="container mx-6 flex items-center justify-between">
+            <span class="text-3xl text-slate-900"><i class="fa-solid fa-shop"></i> Online Shop</span>
+            <nav>
+                <ul class="flex items-center gap-4">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shop</a></li>
+                    <li><a href="cart.html">Cart (<span id="cart_counter">0</span>)</a></li>
+                    <div class="auth flex items-center gap-4">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="dashboard.html?action=logout"><i class="fa-solid fa-right-from-bracket"></i></a></li>
+                    </div>
+                    <div class="guest flex items-center gap-4">
+                        <li><a href="register.html">Register</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </div>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="py-20">
+        <div id="cart" class="container mx-auto py-10"></div>
+        <div id="checkout" class="container mx-auto">
+            <form id="checkoutForm">
+                <input type="text" name="address" placeholder="Enter your address" required class="border px-2 py-1"/>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 mt-4">Checkout</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-orange-100">
+        <div class="container mx-auto h-16 flex justify-between items-center">
+            <p>Copyrights &copy; Online Shop, 2024</p>
+            <p>Developer PP Team</p>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { authLinks, cartCounter, renderCart, initRemoveButtons } from "./modules/App.js";
+
+        const isloggedin = localStorage.getItem('isloggedin') === 'true';
+        const cartDiv = document.querySelector('#cart');
+
+        authLinks(isloggedin);
+
+        const cart = JSON.parse(localStorage.getItem('cart')) || {};
+        document.querySelector('#cart_counter').innerHTML = cartCounter(cart);
+
+        cartDiv.innerHTML = renderCart(cart);
+
+        initRemoveButtons();
+
+        const checkoutForm = document.getElementById('checkoutForm');
+        checkoutForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const address = checkoutForm.address.value;
+
+            const updatedCart = JSON.parse(localStorage.getItem('cart')) || {};
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.push({
+                items: updatedCart,
+                address: address,
+                status: 'Shipping'
+            });
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            alert(`Checkout successful! Your order will be delivered to ${address}.`);
+            localStorage.removeItem('cart');
+            cartDiv.innerHTML = '<p>Your cart is empty.</p>';
+            document.querySelector('#cart_counter').innerHTML = '0';
+            checkoutForm.reset();
+
+            console.log("Current orders:", JSON.parse(localStorage.getItem('orders')));
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>
